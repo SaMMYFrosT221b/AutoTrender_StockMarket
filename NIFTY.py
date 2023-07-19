@@ -1,7 +1,7 @@
 import pandas as pd
 import requests
 
-URL = "https://www.nseindia.com/api/option-chain-indices?symbol=BANKNIFTY"
+URL = "https://www.nseindia.com/api/option-chain-indices?symbol=NIFTY"
 
 header = {
     "Accept-Encoding": "gzip, deflate, br",
