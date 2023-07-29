@@ -1,7 +1,8 @@
 import pandas as pd
 import requests
+from openpyxl import load_workbook
 
-URL = "https://www.nseindia.com/api/option-chain-indices?symbol=BANKNIFTY"
+URL = "https://www.nseindia.com/api/option-chain-indices?symbol=NIFTY"
 
 header = {
     "Accept-Encoding": "gzip, deflate, br",
@@ -16,65 +17,69 @@ data = session.get(url=URL, headers=header).json()["records"]["data"]
 
 df = pd.DataFrame(data)
 
+count = 0
+list = [
+    "openInterest",
+    "changeinOpenInterest",
+    "totalTradedVolume",
+    "lastPrice",
+    "change",
+    "strikePrice",
+]
 CE_data = []
 PE_data = []
 for i in range(len(df)):
-    if df["expiryDate"][i] == "20-Jul-2023":
+    if df["expiryDate"][i] == "03-Aug-2023":
         CE_data.append(df["CE"][i])
         PE_data.append(df["PE"][i])
 
-max_OI_CE = -10000000
-change_at_max_OI_CE = 0
-strike_price_CE = 0
-open_CE = []
-for i in CE_data:
-    value = i["openInterest"]
-    open_CE.append(value)
-    if value > max_OI_CE:
-        max_OI_CE = value
-        change_at_max_OI_CE = i["changeinOpenInterest"]
-        strike_price_CE = i["strikePrice"]
 
-open_CE.sort()
-
-max_OI_PE = -10000000
-change_at_max_OI_PE = 0
-strike_price_PE = 0
-open_PE = []
-for i in PE_data:
-    value = i["openInterest"]
-    open_PE.append(i["openInterest"])
-    if value > max_OI_PE:
-        max_OI_PE = value
-        change_at_max_OI_PE = i["changeinOpenInterest"]
-        strike_price_PE = i["strikePrice"]
+openInterestCE = []
+changeinOpenInterestCE = []
+totalTradedVolumeCE = []
+lastPriceCE = []
+changeCE = []
+strikePrice = []
+openInterestPE = []
+changeinOpenInterestPE = []
+totalTradedVolumePE = []
+lastPricePE = []
+changePE = []
 
 
-open_PE.sort()
-open_PE = open_PE[-20:]
-open_CE = open_CE[-20:]
+# print(CE_data)
+
+for i in range(len(CE_data)):
+    openInterestCE.append(CE_data[i]["openInterest"])
+    changeinOpenInterestCE.append(CE_data[i]["changeinOpenInterest"])
+    totalTradedVolumeCE.append(CE_data[i]["totalTradedVolume"])
+    lastPriceCE.append(CE_data[i]["lastPrice"])
+    changeCE.append(CE_data[i]["change"])
+
+    strikePrice.append(CE_data[i]["strikePrice"])
+
+    openInterestPE.append(PE_data[i]["openInterest"])
+    changeinOpenInterestPE.append(PE_data[i]["changeinOpenInterest"])
+    totalTradedVolumePE.append(PE_data[i]["totalTradedVolume"])
+    lastPricePE.append(PE_data[i]["lastPrice"])
+    changePE.append(PE_data[i]["change"])
 
 
-# Finding total CE and PE
-total_OI_CE = 0
-for i in open_CE:
-    total_OI_CE += i
-
-total_OI_PE = 0
-for i in open_PE:
-    total_OI_PE += i
-
-
-all_value = [
-    max_OI_CE,
-    change_at_max_OI_CE,
-    strike_price_CE,
-    total_OI_PE / total_OI_CE,
-    max_OI_PE,
-    change_at_max_OI_PE,
-    strike_price_PE,
-]
-
-print(
-    f"Call: ({all_value[0]}, {all_value[1]}, {all_value[2]}) :: PCR-> {all_value[3]} ::  Put: ({all_value[4]}, {all_value[5]}, {all_value[6]})"
+headings = pd.DataFrame(
+    {
+        "OI": openInterestCE,
+        "CHNG": changeinOpenInterestCE,
+        "VOLUME": totalTradedVolumeCE,
+        "LTP": lastPriceCE,
+        "Change": changeCE,
+        "Strike": strikePrice,
+        "Chnage ": changePE,
+        "LTP ": lastPricePE,
+        "Volume ": totalTradedVolumePE,
+        "CHNG ": changeinOpenInterestPE,
+        "OI ": openInterestPE,
+    }
 )
+
+
+headings.to_excel("./Option.xlsx", index=False)
