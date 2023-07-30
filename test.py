@@ -1,6 +1,12 @@
+import openpyxl
 import pandas as pd
 import requests
-from openpyxl import load_workbook
+
+wb = openpyxl.load_workbook("./Option.xlsx")
+
+total_sheets = wb.sheetnames
+sh1 = wb["Sheet1"]
+
 
 URL = "https://www.nseindia.com/api/option-chain-indices?symbol=NIFTY"
 
@@ -65,21 +71,15 @@ for i in range(len(CE_data)):
     # changePE.append(PE_data[i]["change"])
 
 
-headings = pd.DataFrame(
-    {
-        "OI": openInterestCE,
-        "CHNG": changeinOpenInterestCE,
-        "VOLUME": totalTradedVolumeCE,
-        # "LTP": lastPriceCE,
-        # "Change": changeCE,
-        "Strike": strikePrice,
-        # "Chnage ": changePE,
-        # "LTP ": lastPricePE,
-        "Volume ": totalTradedVolumePE,
-        "CHNG ": changeinOpenInterestPE,
-        "OI ": openInterestPE,
-    }
-)
+for i in range(2, len(CE_data)):
+    sh1.cell(i, 1).value = openInterestCE[i - 2]
+    sh1.cell(i, 2).value = changeinOpenInterestCE[i - 2]
+    sh1.cell(i, 3).value = totalTradedVolumeCE[i - 2]
+    sh1.cell(i, 4).value = strikePrice[i - 2]
+    sh1.cell(i, 5).value = totalTradedVolumePE[i - 2]
+    sh1.cell(i, 6).value = changeinOpenInterestPE[i - 2]
+    sh1.cell(i, 7).value = openInterestPE[i - 2]
 
 
-headings.to_excel("./Option.xlsx", index=False)
+wb.save("./Option.xlsx")
+wb.close()
